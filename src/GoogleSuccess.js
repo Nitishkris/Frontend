@@ -1,30 +1,23 @@
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function GoogleSuccess({ onLoginSuccess }) {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    fetch("http://localhost:8080/users/me", {
-      credentials: "include", // Important! Send cookies
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
+  useEffect(() => {
+    // simulate getting email from backend (adapt to your backend)
+    fetch("http://localhost:8080/users/current") // replace with your endpoint
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.email) {
+          onLoginSuccess(data.email);
+          navigate("/event-form");
+        }
       })
-      .then(data => {
-  if (data.email) {
-    onLoginSuccess(data.email); // or data.name if you prefer
-    navigate("/dashboard");
-  } else {
-    navigate("/");
-  }
-})
-      .catch(() => {
-        navigate("/");
+      .catch((err) => {
+        console.error("Error fetching user:", err);
       });
-  }, [location, onLoginSuccess, navigate]);
+  }, [onLoginSuccess, navigate]);
 
-  return <p>Loading user info...</p>;
+  return <p>Logging in with Google...</p>;
 }
